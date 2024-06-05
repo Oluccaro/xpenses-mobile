@@ -1,11 +1,9 @@
-import 'package:ds873/pages/inicial_page.dart';
+import 'package:ds873/pages/listaviagens_page.dart';
 import 'package:flutter/material.dart';
-import 'package:ds873/pages/cadastrogastos_page.dart';
 
 void main() {
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   @override
@@ -13,7 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Lista de Gastos',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blueGrey,
       ),
       home: TripListScreen(),// Chamando a página TripListScreen como a página inicial
 

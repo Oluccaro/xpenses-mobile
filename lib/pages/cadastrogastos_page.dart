@@ -1,21 +1,8 @@
+import 'package:ds873/bars/top_bar.dart';
+import 'package:ds873/pages/ler_qrcode.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Cadastro de Gastos',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: AddExpenseScreen(),
-    );
-  }
-}
+import 'package:image_picker/image_picker.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   @override
@@ -25,16 +12,14 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String _selectedExpense = 'Alimentação';
   String _description = '';
-  // File _image;
 
   final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Novo Gasto'),
-      ),
+      appBar: TemplateAppBar(),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
@@ -42,6 +27,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Text(
+                'Cadastrar novo gasto',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Descrição do Gasto'),
                 validator: (value) {
@@ -58,7 +48,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
               DropdownButtonFormField<String>(
                 value: _selectedExpense,
-                items: <String>['Alimentação', 'Transporte', 'Entretenimento']
+                items: <String>['Alimentação', 'Transporte', 'Entretenimento', 'Saúde']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -71,7 +61,28 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   });
                 },
               ),
-              // Add image picker widget here
+              SizedBox(height: 16),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      _openCameraForQR(context);
+                    },
+                    icon: Icon(Icons.qr_code_scanner),
+                    label: Text('Ler QR Code',),
+
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      _pickImageFromGallery();
+                    },
+                    icon: Icon(Icons.photo_library),
+                    label: Text('Escolher da Galeria'),
+                  ),
+                ],
+              ),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -100,5 +111,21 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         ),
       ),
     );
+  }
+
+  void _openCameraForQR(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => QRCodePage(),
+      ),
+    );
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    final pickedFile = await _picker.getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      // Handle the picked image
+    }
   }
 }
