@@ -2,36 +2,46 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
 class Scraper {
-  static Future<CupomFiscalData> scrap(String url) async {
-    final response = await http.get(Uri.parse(url));
+  static Future<CupomFiscalData?> scrap(String url) async {
+    try {
+      final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      final document = parse(response.body);
+      if (response.statusCode == 200) {
+        final document = parse(response.body);
 
-      //Captura das informações da NF
-      final nomeLoja = document.querySelector('#u20')!.text.trim(); //Loja
+        final nomeLoja =
+            document.querySelector('#u20')?.text.trim() ?? ''; //Loja
 
-      final produtos = document.querySelectorAll('tbody> tr').map((produto) {
-        final nome =
-            produto.querySelector('span.txtTit2')!.text.trim(); //Produto
+        final produtos = document.querySelectorAll('tbody> tr').map((produto) {
+          final nome = produto.querySelector('span.txtTit2')?.text.trim() ?? '';
 
-        final qtd = produto.querySelector('span.Rqtd')!.text;
-        final quantidade = extrairValorDecimal(qtd); //Quantidade
+          final qtd = produto.querySelector('span.Rqtd')?.text ?? '';
+          final quantidade = extrairValorDecimal(qtd); //Quantidade
 
-        final val = produto.querySelector('span.RvlUnit')!.text;
-        final preco = extrairValorDecimal(val); //Preço unitário
+          final val = produto.querySelector('span.RvlUnit')?.text ?? '';
+          final preco = extrairValorDecimal(val); //Preço unitário
 
-        return Produto(nome: nome, quantidade: quantidade, preco: preco);
-      }).toList();
-      final total = document
-          .querySelector('#linhaTotal > span.totalNumb.txtMax')!
-          .text
-          .trim(); //Total NF
+          return Produto(nome: nome, quantidade: quantidade, preco: preco);
+        }).toList();
 
-      return CupomFiscalData(
-          nomeLoja: nomeLoja, produtos: produtos, total: total);
-    } else {
-      throw Exception('Erro ao obter dados do cupom: ${response.statusCode}');
+        final total = document
+                .querySelector('#linhaTotal > span.totalNumb.txtMax')
+                ?.text
+                .trim() ??
+            ''; //Total NF
+
+        return CupomFiscalData(
+          nomeLoja: nomeLoja,
+          produtos: produtos,
+          total: total,
+        );
+      } else {
+        print('Erro: ${response.statusCode}');
+        return null; // Retorne null em caso de erro HTTP
+      }
+    } catch (e) {
+      print('Erro ao fazer scraping: $e');
+      return null; // Retorne null em caso de exceção
     }
   }
 }

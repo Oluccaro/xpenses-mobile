@@ -3,6 +3,10 @@ import 'scrap.dart';
 import 'tela_scrap.dart';
 
 class CupomFiscal extends StatefulWidget {
+  final String scannedCode;
+
+  const CupomFiscal({super.key, required this.scannedCode});
+
   @override
   State<CupomFiscal> createState() => _CupomFiscalState();
 }
@@ -13,8 +17,7 @@ class _CupomFiscalState extends State<CupomFiscal> {
   @override
   void initState() {
     super.initState();
-    _data = Scraper.scrap(
-        "https://www.fazenda.pr.gov.br/nfce/qrcode?p=41231243739437000154651100000693751161457949%7C2%7C1%7C1%7C839903E429C2EC5D88DBA3E64ED41770986FDF78");
+    _data = Scraper.scrap(widget.scannedCode);
   } //Trocar a URL por uma variavel com a informação gerada do QR Code
 
   @override

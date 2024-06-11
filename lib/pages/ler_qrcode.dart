@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:ds873/scraping/consumo_scrap.dart';
+import 'package:ds873/scraping/scrap.dart'; // Importar a tela de cupom fiscal
 
 class QRCodePage extends StatefulWidget {
   const QRCodePage({Key? key}) : super(key: key);
@@ -10,30 +12,46 @@ class QRCodePage extends StatefulWidget {
 
 class _QRCodePageState extends State<QRCodePage> {
   String ticket = '';
-  List<String> tickets = [];
 
-  readQRCode() async {
+  Future<void> readQRCode() async {
     String code = await FlutterBarcodeScanner.scanBarcode(
       "#FFFFFF",
       "Cancelar",
       false,
       ScanMode.QR,
     );
-    setState(() => ticket = code != '-1' ? code : 'Não validado');
 
-    // Stream<dynamic>? reader = FlutterBarcodeScanner.getBarcodeStreamReceiver(
-    //   "#FFFFFF",
-    //   "Cancelar",
-    //   false,
-    //   ScanMode.QR,
-    // );
-    // if (reader != null)
-    //   reader.listen((code) {
-    //     setState(() {
-    //       if (!tickets.contains(code.toString()) && code != '-1')
-    //         tickets.add(code.toString());
-    //     });
-    //   });
+    setState(() {
+      ticket = code != '-1' ? code : 'Não validado';
+    });
+    debugPrint('$code');
+
+    if (code != '-1') {
+      CupomFiscalData? data = await Scraper.scrap(code);
+
+      if (data != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CupomFiscal(scannedCode: code),
+          ),
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Erro'),
+            content: Text('Não foi possível obter os dados do cupom fiscal.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -48,10 +66,6 @@ class _QRCodePageState extends State<QRCodePage> {
             if (ticket != '')
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
-                child: Text(
-                  'Ticket: $ticket',
-                  style: const TextStyle(fontSize: 20),
-                ),
               ),
             ElevatedButton.icon(
               onPressed: readQRCode,

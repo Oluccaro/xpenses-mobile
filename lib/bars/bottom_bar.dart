@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TemplateBarraInferior extends StatelessWidget implements PreferredSizeWidget {
-
+class TemplateBarraInferior extends StatelessWidget
+    implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -11,13 +11,13 @@ class TemplateBarraInferior extends StatelessWidget implements PreferredSizeWidg
         color: Colors.blueGrey,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: _buildBottomBarItems(context),
+          // children: _buildBottomBarItems(context),
         ),
       ),
     );
   }
 
-  List<Widget> _buildBottomBarItems(BuildContext context) {
+  /*List<Widget> _buildBottomBarItems(BuildContext context) {
         return [
           IconButton(
             icon: const Icon(Icons.assignment),
@@ -39,7 +39,7 @@ class TemplateBarraInferior extends StatelessWidget implements PreferredSizeWidg
           ),
         ];
 
-    }
+    }*/
 
   @override
   // TODO: implement preferredSize
