@@ -1,7 +1,8 @@
+import 'package:ds873/pages/cadastrogastos_page.dart';
 import 'package:flutter/material.dart';
 import 'scrap.dart';
 
-Widget buildCupomFiscal(CupomFiscalData data) {
+Widget buildCupomFiscal(BuildContext context, String scannedCode, CupomFiscalData data) {
   return Card(
     elevation: 5,
     margin: EdgeInsets.all(16),
@@ -45,6 +46,20 @@ Widget buildCupomFiscal(CupomFiscalData data) {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ],
+          ),
+
+          SizedBox(height: 20), // Add some space
+          
+          // OK button
+          TextButton(
+            onPressed: () {
+              // Navigate to AddExpenseScreen and pass data
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddExpenseScreen(urlCupom: scannedCode,dataCupom: data)),
+              );
+            },
+            child: Text('OK'),
           ),
         ],
       ),

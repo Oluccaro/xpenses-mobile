@@ -57,9 +57,9 @@ class Produto {
 
 //Classe da Nota Fiscal (loja + produtos + total)
 class CupomFiscalData {
-  final String nomeLoja;
-  final List<Produto> produtos;
-  final String total;
+  String nomeLoja;
+  List<Produto> produtos;
+  String total;
 
   CupomFiscalData({
     required this.nomeLoja,

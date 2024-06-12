@@ -1,20 +1,39 @@
+import 'dart:convert';
+
 import 'package:ds873/bars/top_bar.dart';
 import 'package:ds873/pages/ler_qrcode.dart';
+import 'package:ds873/scraping/consumo_scrap.dart';
+import 'package:ds873/scraping/scrap.dart';
+import 'package:ds873/service/api-service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddExpenseScreen extends StatefulWidget {
+  String? urlCupom;
+  CupomFiscalData? dataCupom;
+  int? tripId;
   @override
-  _AddExpenseScreenState createState() => _AddExpenseScreenState();
+  _AddExpenseScreenState createState() => _AddExpenseScreenState(tripId: this.tripId, scannedUrl: this.urlCupom, dataCupom: this.dataCupom);
+
+  AddExpenseScreen({this.tripId, this.urlCupom, this.dataCupom});
 }
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
-  String _selectedExpense = 'Alimentação';
-  String _description = '';
+  String? _selectedExpense = 'Alimentação';
+  String? _description = '';
+  String? scannedUrl;
+  CupomFiscalData? dataCupom;
+  int? tripId;
+
+  Expense expense = Expense();
+
+  _AddExpenseScreenState({this.tripId, this.scannedUrl, this.dataCupom});
 
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
+  // final ApiService apiService = ApiService(baseUrl: "http://localhost:9000");//web
+  final ApiService apiService = ApiService(baseUrl: "https://charming-dingo-chief.ngrok-free.app");//mobile
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +116,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Save the data
-                        // For now, just navigate back
+                        this.expense.description = this._description;
+                        this.expense.value = double.parse(this.dataCupom?.total.replaceAll(RegExp(','), '.') ?? '0');
+                        this.expense.url = this.scannedUrl;
+                        String expJson = jsonEncode(this.expense.toJson());
+                        try{
+                        this.apiService.postRequest("/travel/1/employee/1/expense", this.expense.toJson());
+                        }catch(e){
+                          print('$e');
+                        }
                         Navigator.pop(context);
                       }
                     },
@@ -127,5 +153,40 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     if (pickedFile != null) {
       // Handle the picked image
     }
+  }
+}
+
+class Expense {
+  int? id;
+  String? description;
+  double? value;
+  String? image;
+  String? url;
+  
+  Expense({
+    this.id,
+    this.description,
+    this.value,
+    this.image,
+    this.url,
+  });
+
+  factory Expense.fromJson(Map<String, dynamic> json) {
+    return Expense(
+      id: json['id'],
+      description: json['description'] ?? '',
+      value: json['value']?.toDouble() ?? '',  // Ensure value is parsed as double
+      image: json['image'] ?? '',
+      url: json['url'] ?? '',
+    );
+  }
+
+    // Convert Expense instance to JSON format
+  Map<String, dynamic> toJson() {
+    return {
+      'description': description,
+      'value': value ?? 0,
+      'url': url?? ''
+    };
   }
 }

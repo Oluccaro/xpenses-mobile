@@ -27,7 +27,7 @@ class _CupomFiscalState extends State<CupomFiscal> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = snapshot.data!;
-          return buildCupomFiscal(data); // Chama o WidgetBuild da tela_scrap
+          return buildCupomFiscal(context, widget.scannedCode, data); // Chama o WidgetBuild da tela_scrap
         } else if (snapshot.hasError) {
           return Text('Erro ao obter dados: ${snapshot.error}');
         }

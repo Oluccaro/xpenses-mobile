@@ -1,30 +1,56 @@
+import 'dart:convert';
+
 import 'package:ds873/bars/top_bar.dart';
 import 'package:ds873/pages/cadastrogastos_page.dart';
+import 'package:ds873/service/api-service.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
+
+class ExpenseListScreen extends StatefulWidget {
+  
+  int tripId;
+  
+  ExpenseListScreen(this.tripId);
+  
+   @override
+  _ExpenseListScreenState createState() => _ExpenseListScreenState(this.tripId);
 }
 
-class MyApp extends StatelessWidget {
+class _ExpenseListScreenState extends State<ExpenseListScreen> {
+  
+  int tripId;
+
+  _ExpenseListScreenState(this.tripId);
+
+  // final ApiService apiService = ApiService(baseUrl: "http://localhost:9000");//web
+  final ApiService apiService = ApiService(baseUrl: "https://charming-dingo-chief.ngrok-free.app");//mobile
+  List<Expense> expenses = [];
+  
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Lista de Gastos',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: ExpenseListScreen(),
-    );
+  void initState() {
+    super.initState();
+    _fetchData();
   }
-}
 
-class ExpenseListScreen extends StatelessWidget {
-  final List<Expense> expenses = [
-    Expense(type: 'Comida', value: 50.0),
-    Expense(type: 'Transporte', value: 30.0),
-    Expense(type: 'Entretenimento', value: 20.0),
-  ];
+
+  void _fetchData() async {
+    final response = await apiService.getRequest('/travel/$tripId/employee/1');
+    String responseBody = utf8.decode(response.body.codeUnits);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseData = json.decode(responseBody);
+      List<dynamic> expensesData = responseData['expenses'];
+      setState(() {
+        try {
+          expenses = expensesData.map((json) => Expense.fromJson(json)).toList();
+        } catch (e) {
+          print('erro$e');
+        }
+        });
+      print(expenses);
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +70,7 @@ class ExpenseListScreen extends StatelessWidget {
                 itemCount: expenses.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(expenses[index].type),
+                    title: Text(expenses[index].description),
                     subtitle: Text('R\$ ${expenses[index].value.toStringAsFixed(2)}'),
                   );
                 },
@@ -57,7 +83,7 @@ class ExpenseListScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddExpenseScreen()),
+            MaterialPageRoute(builder: (context) => AddExpenseScreen(tripId: this.tripId)),
           );
         },
         child: Icon(
@@ -70,9 +96,27 @@ class ExpenseListScreen extends StatelessWidget {
 }
 
 class Expense {
-  final String type;
-  final double value;
+  int id;
+  String description;
+  double value;
+  String image;
+  String url;
+    Expense({
+    required this.id,
+    required this.description,
+    required this.value,
+    required this.image,
+    required this.url,
+  });
 
-  Expense({required this.type, required this.value});
+  factory Expense.fromJson(Map<String, dynamic> json) {
+    return Expense(
+      id: json['id'],
+      description: json['description'] ?? '',
+      value: json['value']?.toDouble() ?? '',  // Ensure value is parsed as double
+      image: json['image'] ?? '',
+      url: json['url'] ?? '',
+    );
+  }
 }
 

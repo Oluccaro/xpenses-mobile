@@ -1,6 +1,8 @@
 import 'package:ds873/pages/listadegastos_page.dart';
+import 'package:ds873/service/api-service.dart';
 import 'package:flutter/material.dart';
 import 'package:ds873/bars/top_bar.dart';
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -19,12 +21,38 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class TripListScreen extends StatelessWidget {
-  final List<Trip> trips = [
-    Trip(name: 'Viagem 1', startDate: '01/05/2024', endDate: '05/05/2024'),
-    Trip(name: 'Viagem 2', startDate: '10/06/2024', endDate: '15/06/2024'),
-    Trip(name: 'Viagem 3', startDate: '20/07/2024', endDate: '25/07/2024'),
-  ];
+
+class TripListScreen extends StatefulWidget {
+    @override
+  _TripListScreenState createState() => _TripListScreenState();
+}
+
+
+class _TripListScreenState extends State<TripListScreen> {
+  
+  // final ApiService apiService = ApiService(baseUrl: "http://localhost:9000");//web
+  final ApiService apiService = ApiService(baseUrl: "https://charming-dingo-chief.ngrok-free.app");//mobile
+  List<Trip> trips = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+
+  void _fetchData() async {
+    final response = await apiService.getRequest('/travel');
+    print(response.body);
+    if (response.statusCode == 200) {
+      List<dynamic> responseData = json.decode(response.body);
+        setState(() {
+          trips = responseData.map((json) => Trip.fromJson(json)).toList();
+        });
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +79,7 @@ class TripListScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ExpenseListScreen()),
+                            builder: (context) => ExpenseListScreen(trips[index].id)),
                       );
                     },
                   );
@@ -68,9 +96,22 @@ class TripListScreen extends StatelessWidget {
 
 
 class Trip {
-  final String name;
-  final String startDate;
-  final String endDate;
+  int id;
+  String name;
+  String startDate;
+  String endDate;
+  String status;
 
-  Trip({required this.name, required this.startDate, required this.endDate});
+  Trip({required this.id, required this.name, required this.startDate, required this.endDate, required this.status});
+
+  factory Trip.fromJson(Map<String, dynamic> json) {
+
+    return Trip(
+      id: json['id'],
+      name: json['name'],
+      startDate: json['startDate'],
+      endDate: json['endDate'],
+      status: json['status'],
+    );
+  }
 }

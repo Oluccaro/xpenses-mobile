@@ -1,3 +1,4 @@
+import 'package:ds873/pages/cadastrogastos_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:ds873/scraping/consumo_scrap.dart';
@@ -27,13 +28,14 @@ class _QRCodePageState extends State<QRCodePage> {
     debugPrint('$code');
 
     if (code != '-1') {
-      CupomFiscalData? data = await Scraper.scrap(code);
 
+      CupomFiscalData? data = await Scraper.scrap(code);
+      print("dados: $data");
       if (data != null) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CupomFiscal(scannedCode: code),
+            builder: (context) => AddExpenseScreen(urlCupom: code, dataCupom: data),
           ),
         );
       } else {
@@ -78,3 +80,5 @@ class _QRCodePageState extends State<QRCodePage> {
     );
   }
 }
+
+
